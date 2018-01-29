@@ -10,7 +10,7 @@ var Service, Characteristic;
 module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
-  homebridge.registerAccessory("homebridge-httpmulti", "HttpMulti", HttpMulti); 
+  homebridge.registerAccessory("homebridge-httpmulti", "HttpMulti", HttpMulti);
   console.log("Loading HttpMulti accessory");
 }
 
@@ -20,7 +20,7 @@ function HttpMulti(log, config) {
   this.up_url = config["up_url"];
   this.down_url = config["down_url"];
   this.open_url = config["open_url"];
-  this.close_url = config["close_url"];  
+  this.close_url = config["close_url"];
   this.on_url = config["on_url"];
   this.off_url = config["off_url"];
   this.lock_url = config["lock_url"];
@@ -29,17 +29,17 @@ function HttpMulti(log, config) {
   if (this.brightness_url === undefined) this.brightness_url = config["speed_url"];
   if (this.brightness_url === undefined) this.brightness_url = config["setpoint_url"];
   this.gettemp_url = config["gettemp_url"];
-  this.mode_url = config["mode_url"];  
+  this.mode_url = config["mode_url"];
   this.unit_type = "C";
-  if (config["tempunits"] !== undefined) this.units = config["tempunits"]; 
+  if (config["tempunits"] !== undefined) this.units = config["tempunits"];
   this.status_url = config["status_url"];
   this.name = config["name"];
   this.deviceType = config["deviceType"];
   this.method = config["http_method"];
   this.httpMethod = config["http_method"];
   if (this.method === undefined) this.method = "GET";
-  
-//TODO add this to ServiceInformation  
+
+//TODO add this to ServiceInformation
   this.serviceName = config["serviceName"];
   if (this.serviceName === undefined) this.serviceName = this.name;
   this.manufacturer = config["accessory"];
@@ -55,7 +55,7 @@ function HttpMulti(log, config) {
     }
   	this.serialNum = "X"+Math.abs(hash);
   }
-  
+
   if (this.deviceType.match(/^blind/i)) {
   	this.log("HttpMulti Blind Object Initializing...");
   	    // state vars
@@ -86,14 +86,14 @@ function HttpMulti(log, config) {
         .getCharacteristic(Characteristic.TargetPosition)
         .on('get', this.getCurrentStatePartial.bind(this))
         .on('set', this.setTargetPosition.bind(this));
-        
-        
+
+
     } else if (this.deviceType.match(/^light/i)) {
   		this.log("HttpMulti Light Object Initializing...");
-    
-     	this.lastState = 0; 
+
+     	this.lastState = 0;
      	this.lastStatePartial = 0;
-    	this.currentState = 0;  
+    	this.currentState = 0;
     	this.TargetState = 0;
     	this.lastUpdate = Date.now();
     	this.partial = 0;
@@ -114,9 +114,9 @@ function HttpMulti(log, config) {
     } else if (this.deviceType.match(/^fan/i)) {
   		this.log("HttpMulti Fan Object Initializing...");
 
-     	this.lastState = 0; 
+     	this.lastState = 0;
      	this.lastStatePartial = 0;
-    	this.currentState = 0;  
+    	this.currentState = 0;
     	this.TargetState = 0;
     	this.partial = 0;
 
@@ -137,8 +137,8 @@ function HttpMulti(log, config) {
     } else if (this.deviceType.match(/^switch/i)) {
   		this.log("HttpMulti Switch Object Initializing...");
 
-     	this.lastState = 0; 
-    	this.currentState = 0;  
+     	this.lastState = 0;
+    	this.currentState = 0;
     	this.TargetState = 0;
 
     // register the service and provide the functions
@@ -154,10 +154,10 @@ function HttpMulti(log, config) {
   		this.log("HttpMulti Garage door Object Initializing...");
 
  	    // state vars
-//		this.lastPosition = 0; 	    
-    	this.lastState = 0; 
-    	this.currentPositionState = 0; 
-    	this.currentTargetPosition = 0; 
+//		this.lastPosition = 0;
+    	this.lastState = 0;
+    	this.currentPositionState = 0;
+    	this.currentTargetPosition = 0;
     	this.lastObstructed = false;
 
     	// register the service and provide the functions
@@ -169,7 +169,7 @@ function HttpMulti(log, config) {
 //        	.on('get', this.getCurrentPosition.bind(this))
         	.on('get', this.getCurrentState.bind(this))
 
-        
+
 		//0 - OPEN, 1 - CLOSED
     	this.service
         	.getCharacteristic(Characteristic.TargetDoorState)
@@ -184,8 +184,8 @@ function HttpMulti(log, config) {
     } else if (this.deviceType.match(/^lock/i)) {
   		this.log("HttpMulti Lock Object Initializing...");
 
-     	this.lastState = 0; 
-    	this.currentState = 0;  
+     	this.lastState = 0;
+    	this.currentState = 0;
     	this.TargetState = 0;
 
     	// register the service and provide the functions
@@ -204,11 +204,11 @@ function HttpMulti(log, config) {
   		this.log("HttpMulti Thermostat Object Initializing...");
 
      	this.lastState = 0; // 0 OFF, 1 HEAT, 2 COOL
-    	this.currentState = 0;  
+    	this.currentState = 0;
     	this.TargetState = 0;
      	//this.lastTemp = ;
      	//this.TargetTemp = 15;
-     	this.units = 0; // 0 Celcius, 1 Fahrenheit 
+     	this.units = 0; // 0 Celcius, 1 Fahrenheit
      	if (this.unit_type !== "C") this.units = 1;
 
    		this.service = new Service.Thermostat(this.name);
@@ -236,7 +236,7 @@ function HttpMulti(log, config) {
         	.getCharacteristic(Characteristic.TemperatureDisplayUnits)
         	.on('get', this.getCurrentUnits.bind(this))
 
-   
+
 	} else {
 		this.log("Unknown device type "+this.deviceType);
 	}
@@ -263,7 +263,7 @@ HttpMulti.prototype.getCurrentState = function(callback) {
   			if (!error && response.statusCode == 200) {
     			if (body !== undefined) {
     				if (!isNaN(parseFloat(body)) && isFinite(body)) {
-	    			    this.lastState = (parseInt(body) > 0);	
+	    			    this.lastState = (parseInt(body) > 0);
 	    				this.log("Got Status %s",this.lastState);
 
 	    			} else {
@@ -271,8 +271,8 @@ HttpMulti.prototype.getCurrentState = function(callback) {
 	    			}
     			} else {
     				this.log("Warning, data returned isn't defined");
-    			}  	
-    		this.log("callback CurrentState: %s", this.lastState);      				
+    			}
+    		this.log("callback CurrentState: %s", this.lastState);
   			callback(null, this.lastState);
   			}
     	}.bind(this));
@@ -291,15 +291,15 @@ HttpMulti.prototype.getCurrentStatePartial = function(callback) {
   			if (!error && response.statusCode == 200) {
     			if (body !== undefined) {
     				if (!isNaN(parseFloat(body)) && isFinite(body)) {
-	    			    this.lastStatePartial = parseInt(body);	
+	    			    this.lastStatePartial = parseInt(body);
 	    				this.log("Got Status %s",this.lastStatePartial);
 	    			} else {
 	    				this.log("Warning, status returned isn't numeric: %s",body);
 	    			}
     			} else {
     				this.log("Warning, data returned isn't defined");
-    			}  	
-    		this.log("callback CurrentState: %s", this.lastStatePartial);      				
+    			}
+    		this.log("callback CurrentState: %s", this.lastStatePartial);
   			callback(null, this.lastStatePartial);
   			}
     	}.bind(this));
@@ -323,7 +323,7 @@ HttpMulti.prototype.getCurrentTemp = function(callback) {
   			if (!error && response.statusCode == 200) {
     			if (body !== undefined) {
     				if (!isNaN(parseFloat(body)) && isFinite(body)) {
-	    			    this.lastTemp = parseInt(body);	
+	    			    this.lastTemp = parseInt(body);
 	    				this.log("Got Temp %s",this.lastTemp);
     					callback(null, this.lastTemp);
 	    			} else {
@@ -331,7 +331,7 @@ HttpMulti.prototype.getCurrentTemp = function(callback) {
 	    			}
     			} else {
     				this.log("Warning, data returned isn't defined");
-    			}  				
+    			}
   			}
     	}.bind(this));
     } else {
@@ -359,7 +359,7 @@ HttpMulti.prototype.setTargetPosition = function(pos, callback) {
 
     this.service
         .setCharacteristic(Characteristic.PositionState, (moveUp ? 1 : 0));
-        
+
 	this.log("up="+this.up_url+" down="+this.down_url+" method="+this.httpMethod);
     this.httpRequest((moveUp ? this.up_url : this.down_url), this.httpMethod, function() {
         this.log("Success moving %s", (moveUp ? "up (to 100)" : "down (to 0)"))
@@ -378,7 +378,7 @@ HttpMulti.prototype.setTargetDoorPosition = function(pos, callback) {
     this.currentTargetPosition = pos;
     //const moveUp = (this.currentTargetPosition >= this.lastPosition);
     this.log((pos ? "Moving down" : "Moving up"));
-        
+
 	this.log("up="+this.up_url+" down="+this.down_url+" method="+this.httpMethod);
     this.httpRequest((pos ? this.down_url : this.up_url), this.httpMethod, function() {
         this.log("Success moving %s", (pos ? "down (to 0)" : "up (to 1)"));
@@ -448,7 +448,7 @@ HttpMulti.prototype.setCurrentTemp = function(value, callback) {
 HttpMulti.prototype.setCurrentStatePartial = function(value, callback) {
     this.log("Set Partial State: %s", value);
     this.currentTargetState = value;
-           	this.partial = 1; 	
+           	this.partial = 1;
 
 //	if (this.lastUpdate > (Date.now() + 1000)) {
 	    var myURL = this.brightness_url;
@@ -457,7 +457,7 @@ HttpMulti.prototype.setCurrentStatePartial = function(value, callback) {
     	} else {
         	// replace %VALUE% with value in the URL
         	myURL = myURL.replace("%VALUE%",value);
-  		}      
+  		}
 		this.log("brightness URL="+myURL);
     	this.httpRequest(myURL, this.httpMethod, function() {
         	this.log("Success turning %s", (value))
@@ -468,7 +468,7 @@ HttpMulti.prototype.setCurrentStatePartial = function(value, callback) {
     	}.bind(this));
     	this.lastUpdate = Date.now();
 //    } else {
-//      this.log("Brightness not changing due to throttle. Last update is: %s", this.lastUpdate);  
+//      this.log("Brightness not changing due to throttle. Last update is: %s", this.lastUpdate);
 //    }
 }
 
@@ -483,7 +483,7 @@ HttpMulti.prototype.setCurrentLockState = function(value, callback) {
         this.lastState = value;
      	var currentState = (value == Characteristic.LockTargetState.SECURED) ?
         	Characteristic.LockCurrentState.SECURED : Characteristic.LockCurrentState.UNSECURED;
-      
+
       	this.service.setCharacteristic(Characteristic.LockCurrentState, currentState);
 
         callback(null);
